@@ -2,184 +2,275 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1e1e2f;
-            margin: 0;
-            padding: 0;
-            color: #e0e0e0;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stimulation Dashboard</title>
 
-        .window {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
+  <style>
+    /* Reset default margin and padding */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background: #282a36;
-            color: #f8f8f2;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-        }
+    body {
+      background-color: #1e1e2f;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .content {
-            display: flex;
-            flex-grow: 1;
-            padding: 20px;
-            gap: 20px;
-        }
+    .header {
+      background-color: #24243e;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      color: #fff;
+    }
 
-        .left-section, .right-section {
-            flex: 1;
-            background: #282a36;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5);
-        }
+    .connection-status {
+      font-size: 18px;
+      margin-top: 10px;
+    }
 
-        .right-section img {
-            width: 100%;
-            height: 300px;
-            border-radius: 8px;
-            border: 1px solid #444;
-            object-fit: cover;
-        }
+    .dashboard-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
 
-        .bottom-section {
-            padding: 20px;
-            background: #282a36;
-            text-align: center;
-            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
-        }
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      gap: 10px;
+    }
 
-        .app-buttons button {
-            margin: 5px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: #6272a4;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+    .top-section {
+      display: flex;
+      flex: 1;
+      gap: 10px;
+    }
 
-        .app-buttons button:hover {
-            background-color: #50fa7b;
-        }
+    .stream-section,
+    .ecg-section {
+      flex: 1;
+      background-color: #2d2d44;
+      padding: 10px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
 
-        canvas {
-            width: 100%;
-            height: 300px;
-            background: #1e1e2f;
-            border: 1px solid #444;
-            border-radius: 8px;
-        }
-    </style>
+    .stream-section img,
+    .ecg-section canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border: 2px solid #444;
+      border-radius: 10px;
+    }
+
+    .bottom-section {
+      display: flex;
+      gap: 10px;
+      height: 40%;
+      /* Adjust height to balance top and bottom sections */
+    }
+
+    .vital-signs,
+    .system-metrics {
+      flex: 1;
+      background-color: #2d2d44;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 24px;
+    }
+
+    .vital,
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 20px;
+      color: #fff;
+    }
+
+    /* Add other CSS styling here */
+  </style>
 </head>
 
 <body>
-    <div class="window">
-        <div class="status-bar">
-            <div class="status-left">Dashboard</div>
-            <div class="status-center" id="app-name">Application: Emergency Response and Suturing</div>
-            <div class="status-right" id="time"></div>
-        </div>
+  <div class="dashboard-container">
+    <header class="header">
+      <h1>SIMULATION DASHBOARD</h1>
+      <div class="connection-status">
+        <span id="connection-indicator" class="connected">Connected</span>
+        <span id="time-display">00:00:00</span>
+      </div>
+    </header>
 
-        <div class="content">
-            <div class="left-section">
-                <h2>System Metrics</h2>
-                <div id="metrics" class="metrics-container">
-                    <span class="metric-text" id="cpu">CPU: 0%</span>
-                    <span class="metric-text" id="memory">Memory: 0%</span>
-                    <span class="metric-text" id="disk">Disk: 0%</span>
-                </div>
-                <canvas id="metricsGraph"></canvas>
-            </div>
+    <main class="main-content">
+      <div class="top-section">
+        <section class="stream-section">
+          <h2>Live Stream</h2>
+          <img src="{{ url_for('video_feed') }}" alt="Video Stream" class="video-feed">
+        </section>
 
-            <div class="right-section">
-                <h2>Real time game stream</h2>
-                <img id="video-stream" src="https://source.unsplash.com/featured/?hospital,emergency,operation&timestamp=0" alt="Live Stream">
-            </div>
-        </div>
+        <section class="ecg-section">
+          <h2>ECG</h2>
+          <canvas id="ecgCanvas"></canvas>
+          <p id="ecg-status" class="status-safe">SAFE</p>
+        </section>
+      </div>
 
-        <div class="bottom-section">
-            <h2>Applications launch deck</h2>
-            <div class="app-buttons">
-                <button onclick="launchApp('Emergency Protocol')">Emergency Protocol</button>
-                <button onclick="launchApp('Suturing Simulator')">Suturing Simulator</button>
-            </div>
-        </div>
-    </div>
+      <div class="bottom-section">
+        <section class="vital-signs">
+          <h2>Vital Signs</h2>
+          <div class="vital"><label>REP</label><span id="rep-value">1 / 30</span></div>
+          <div class="vital"><label>PULSE</label><span id="pulse-value">80</span></div>
+          <div class="vital"><label>TEMP</label><span id="temperature-value">37.2°C</span></div>
+          <div class="vital"><label>SPO2</label><span id="spo2-value">98%</span></div>
+          <div class="vital"><label>Language</label><span id="language-value">English</span></div>
+        </section>
 
-    <script>
-        let ecgChart;
-        let ecgDataBuffer = Array(100).fill(0);
+        <section class="system-metrics">
+          <h2>System Metrics</h2>
+          <div class="metric"><label>CPU Usage</label><span id="cpu-usage">-</span></div>
+          <div class="metric"><label>Memory Usage</label><span id="memory-usage">-</span></div>
+          <div class="metric"><label>Disk Usage</label><span id="disk-usage">-</span></div>
+        </section>
+      </div>
+    </main>
+  </div>
 
-        function generateECGWave() {
-            let newData = [];
-            for (let i = 0; i < 100; i++) {
-                let value = Math.sin(2 * Math.PI * (i / 30)) * 3;
-                value += Math.sin(2 * Math.PI * (i / 15)) * 1.5;
-                value += Math.sin(2 * Math.PI * (i / 60)) * 0.8;
-                newData.push(value);
+  <script>
+    // Get the canvas and context
+    const canvas = document.getElementById('ecgCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // ECG waveform parameters
+    let ecgData = [];
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+
+    // Predefined ECG waveform pattern (one cardiac cycle)
+    const ecgPattern = [
+        0, 0, 5, 10, 20, 40, 20, 10, 5, 0, -5, -10, -20, -30, -20, -10, -5, 0, 0, 0, 0, 0,
+        0, 5, 10, 15, 30, 50, 30, 15, 10, 5, 0, -5, -10, -15, -10, -5, 0, 0, 0, 0, 0, 0
+    ];
+
+    // Normalize the ECG pattern to fit the canvas height
+    function normalizeECG(pattern, height) {
+        const maxAmplitude = Math.max(...pattern);
+        const minAmplitude = Math.min(...pattern);
+        return pattern.map(value => {
+            return (value - minAmplitude) / (maxAmplitude - minAmplitude) * height * 0.5 + height * 0.25;
+        });
+    }
+
+    // Add noise to the ECG pattern
+    function addNoiseToPattern(pattern, noiseLevel) {
+        return pattern.map(value => value + (Math.random() - 0.5) * noiseLevel);
+    }
+
+    // Generate the initial ECG data with a delay (flat baseline) between waves
+    function initializeECGData() {
+        ecgData = new Array(canvasWidth).fill(canvasHeight / 2);
+        let normalizedPattern = normalizeECG(ecgPattern, canvasHeight);
+        normalizedPattern = addNoiseToPattern(normalizedPattern, 2); // Subtle noise
+
+        // Create a delayed pattern with a gap (flat line) between waves
+        let delayedPattern = [];
+        for (let i = 0; i < normalizedPattern.length; i++) {
+            delayedPattern.push(normalizedPattern[i]);
+        }
+        for (let i = 0; i < 50; i++) { // Adding a delay of 50 points (flat baseline)
+            delayedPattern.push(canvasHeight / 2);
+        }
+
+        // Fill the initial data with the delayed pattern
+        let index = 0;
+        for (let i = 0; i < ecgData.length; i++) {
+            ecgData[i] = delayedPattern[index];
+            if (i % 4 === 0) { // Stretch the pattern horizontally
+                index = (index + 1) % delayedPattern.length;
             }
-            ecgDataBuffer = ecgDataBuffer.concat(newData).slice(newData.length);
-            return ecgDataBuffer;
+        }
+    }
+
+    // Function to update the ECG waveform
+    function updateECG() {
+        // Shift the data to the left
+        ecgData.shift();
+
+        // Add the next point from the delayed pattern with noise
+        let normalizedPattern = normalizeECG(ecgPattern, canvasHeight);
+        let delayedPattern = [];
+        for (let i = 0; i < normalizedPattern.length; i++) {
+            delayedPattern.push(normalizedPattern[i]);
+        }
+        for (let i = 0; i < 50; i++) { // Adding a delay of 50 points (flat baseline)
+            delayedPattern.push(canvasHeight / 2);
         }
 
-        function updateECGChart() {
-            if (!ecgChart) {
-                const ctx = document.getElementById("metricsGraph").getContext("2d");
-                ecgChart = new Chart(ctx, {
-                    type: "line",
-                    data: {
-                        labels: Array.from({ length: ecgDataBuffer.length }, (_, i) => i),
-                        datasets: [{
-                            label: "ECG Signal",
-                            data: ecgDataBuffer,
-                            borderColor: "#ff6384",
-                            backgroundColor: "rgba(255, 99, 132, 0.2)",
-                            fill: false,
-                            pointRadius: 0,
-                            borderWidth: 3,
-                            tension: 0.1
-                        }]
-                    },
-                    options: {
-                        animation: false,
-                        responsive: true,
-                        scales: {
-                            x: { display: true, title: { display: true, text: 'Time (ms)' } },
-                            y: { beginAtZero: false, title: { display: true, text: 'Amplitude (mV)' } }
-                        }
-                    }
-                });
-            } else {
-                ecgChart.data.datasets[0].data = generateECGWave();
-                ecgChart.update();
+        let newPoint = delayedPattern[(xOffset++) % delayedPattern.length] + (Math.random() - 0.5) * 2;
+        ecgData.push(newPoint);
+
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the ECG line
+        ctx.beginPath();
+        ctx.moveTo(0, ecgData[0]);
+        for (let i = 1; i < ecgData.length; i++) {
+            ctx.lineTo(i, ecgData[i]);
+        }
+        ctx.strokeStyle = '#00ff00';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+
+    // Initialize ECG data and start updating
+    let xOffset = 0;
+    initializeECGData();
+    setInterval(updateECG, 60); // Slowed down the update interval for a noticeable delay
+
+    // Periodically reinitialize ECG data to avoid drift
+    setInterval(initializeECGData, 30000); // Reinitialize every 30 seconds
+
+    // Function to fetch and display system metrics
+    async function fetchMetrics() {
+        try {
+            const response = await fetch('/metrics');
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
+
+            const data = await response.json();
+            document.getElementById('cpu-usage').textContent = `${data.cpu_usage}%`;
+            document.getElementById('memory-usage').textContent = `${data.memory_usage}%`;
+            document.getElementById('disk-usage').textContent = `${data.disk_usage}%`;
+        } catch (error) {
+            console.error('Error fetching metrics:', error);
         }
+    }
 
-        function updateImage() {
-            const img = document.getElementById("video-stream");
-            img.src = `https://source.unsplash.com/featured/?hospital,emergency,operation&timestamp=${new Date().getTime()}`;
-        }
-
-        setInterval(updateECGChart, 200);
-        setInterval(updateImage, 5000);
-
-        updateECGChart();
-        updateImage();
-    </script>
+    // Fetch metrics every 2 seconds
+    setInterval(fetchMetrics, 2000);
+    fetchMetrics(); // Initial call to load data immediately
+  </script>
 </body>
 
 </html>
