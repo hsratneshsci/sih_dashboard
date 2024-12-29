@@ -121,20 +121,14 @@
 
     <script>
         let ecgChart;
-        let ecgDataBuffer = new Array(100).fill(0);
+        let ecgDataBuffer = [0, 0.1, 0.3, 0.6, 1.0, 0.6, 0.3, 0.1, 0, -0.1, -0.3, -0.6, -1.0, -0.6, -0.3, -0.1, 0];
 
-        async function fetchECGData() {
-            try {
-                const data = { ecg: Array.from({ length: 10 }, () => Math.random() * 2 - 1) };
-                updateECGChart(data.ecg);
-            } catch (error) {
-                console.error("Error fetching ECG data:", error);
-            }
+        function generateECGWave() {
+            ecgDataBuffer = ecgDataBuffer.concat(ecgDataBuffer).slice(ecgDataBuffer.length / 2);
+            return ecgDataBuffer;
         }
 
-        function updateECGChart(newData) {
-            ecgDataBuffer = ecgDataBuffer.concat(newData).slice(newData.length);
-
+        function updateECGChart() {
             if (!ecgChart) {
                 const ctx = document.getElementById("metricsGraph").getContext("2d");
                 ecgChart = new Chart(ctx, {
@@ -162,13 +156,13 @@
                     }
                 });
             } else {
-                ecgChart.data.datasets[0].data = ecgDataBuffer;
+                ecgChart.data.datasets[0].data = generateECGWave();
                 ecgChart.update();
             }
         }
 
-        setInterval(fetchECGData, 2000);
-        fetchECGData();
+        setInterval(updateECGChart, 500);
+        updateECGChart();
     </script>
 </body>
 
