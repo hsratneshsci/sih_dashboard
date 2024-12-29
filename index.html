@@ -48,9 +48,10 @@
 
         .right-section img {
             width: 100%;
-            height: auto;
+            height: 300px;
             border-radius: 8px;
             border: 1px solid #444;
+            object-fit: cover;
         }
 
         .bottom-section {
@@ -106,7 +107,7 @@
 
             <div class="right-section">
                 <h2>Real time game stream</h2>
-                <img id="video-stream" src="https://source.unsplash.com/400x300/?hospital,medical" alt="Live Stream">
+                <img id="video-stream" src="https://source.unsplash.com/featured/?hospital,emergency,operation&timestamp=0" alt="Live Stream">
             </div>
         </div>
 
@@ -121,10 +122,17 @@
 
     <script>
         let ecgChart;
-        let ecgDataBuffer = [0, 0.1, 0.3, 0.6, 1.0, 0.6, 0.3, 0.1, 0, -0.1, -0.3, -0.6, -1.0, -0.6, -0.3, -0.1, 0];
+        let ecgDataBuffer = Array(100).fill(0);
 
         function generateECGWave() {
-            ecgDataBuffer = ecgDataBuffer.concat(ecgDataBuffer).slice(ecgDataBuffer.length / 2);
+            let newData = [];
+            for (let i = 0; i < 100; i++) {
+                let value = Math.sin(2 * Math.PI * (i / 30)) * 3;
+                value += Math.sin(2 * Math.PI * (i / 15)) * 1.5;
+                value += Math.sin(2 * Math.PI * (i / 60)) * 0.8;
+                newData.push(value);
+            }
+            ecgDataBuffer = ecgDataBuffer.concat(newData).slice(newData.length);
             return ecgDataBuffer;
         }
 
@@ -142,7 +150,7 @@
                             backgroundColor: "rgba(255, 99, 132, 0.2)",
                             fill: false,
                             pointRadius: 0,
-                            borderWidth: 2,
+                            borderWidth: 3,
                             tension: 0.1
                         }]
                     },
@@ -161,8 +169,16 @@
             }
         }
 
-        setInterval(updateECGChart, 500);
+        function updateImage() {
+            const img = document.getElementById("video-stream");
+            img.src = `https://source.unsplash.com/featured/?hospital,emergency,operation&timestamp=${new Date().getTime()}`;
+        }
+
+        setInterval(updateECGChart, 200);
+        setInterval(updateImage, 5000);
+
         updateECGChart();
+        updateImage();
     </script>
 </body>
 
