@@ -5,9 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stimulation Dashboard</title>
-
   <style>
-    /* Reset default margin and padding */
+    /* General styling */
     * {
       margin: 0;
       padding: 0;
@@ -15,99 +14,183 @@
     }
 
     body {
-      background-color: #1e1e2f;
-      color: #fff;
       font-family: Arial, sans-serif;
-      height: 100vh;
+      background-color: #f4f4f9;
+      color: #333;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
 
+    /* Dashboard container */
+    .dashboard-container {
+      width: 90%;
+      max-width: 1200px;
+      background-color: #ffffff;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+
+    /* Header */
     .header {
-      background-color: #24243e;
-      padding: 15px;
-      text-align: center;
-      font-size: 24px;
-      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      color: #4CAF50;
     }
 
     .connection-status {
-      font-size: 18px;
-      margin-top: 10px;
-    }
-
-    .dashboard-container {
       display: flex;
-      flex-direction: column;
-      height: 100%;
+      align-items: center;
     }
 
+    #connection-indicator {
+      font-weight: bold;
+      color: green;
+    }
+
+    #time-display {
+      margin-left: 15px;
+      font-size: 1rem;
+      color: #888;
+    }
+
+    /* Main content */
     .main-content {
-      flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 10px;
-      gap: 10px;
     }
 
     .top-section {
       display: flex;
-      flex: 1;
-      gap: 10px;
+      justify-content: space-between;
     }
 
-    .stream-section,
+    .stream-section, .ecg-section {
+      width: 48%;
+    }
+
+    .stream-section h2, .ecg-section h2 {
+      font-size: 1.2rem;
+      color: #333;
+    }
+
+    .video-feed {
+      width: 100%;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
     .ecg-section {
-      flex: 1;
-      background-color: #2d2d44;
-      padding: 10px;
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
+      position: relative;
+      height: 300px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
     }
 
-    .stream-section img,
-    .ecg-section canvas {
+    #ecgCanvas {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      border: 2px solid #444;
-      border-radius: 10px;
+      background-color: #f1f1f1;
+      border-radius: 8px;
     }
 
+    /* Status for ECG */
+    #ecg-status {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-weight: bold;
+      padding: 5px;
+      background-color: rgba(0, 255, 0, 0.6);
+      color: white;
+      border-radius: 5px;
+    }
+
+    .status-safe {
+      background-color: rgba(0, 255, 0, 0.6);
+    }
+
+    .status-danger {
+      background-color: rgba(255, 0, 0, 0.6);
+    }
+
+    /* Bottom section */
     .bottom-section {
       display: flex;
-      gap: 10px;
-      height: 40%;
-      /* Adjust height to balance top and bottom sections */
-    }
-
-    .vital-signs,
-    .system-metrics {
-      flex: 1;
-      background-color: #2d2d44;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      font-size: 24px;
-    }
-
-    .vital,
-    .metric {
-      display: flex;
       justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .vital-signs, .system-metrics {
+      width: 48%;
+    }
+
+    .vital-signs h2, .system-metrics h2 {
+      font-size: 1.2rem;
+      color: #333;
       margin-bottom: 10px;
     }
 
-    h2 {
-      font-size: 20px;
-      color: #fff;
+    .vital, .metric {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
     }
 
-    /* Add other CSS styling here */
+    .vital label, .metric label {
+      font-weight: bold;
+    }
+
+    .vital span, .metric span {
+      font-size: 1.2rem;
+    }
+
+    .vital-signs .vital span {
+      font-size: 1.5rem;
+      color: #4CAF50;
+    }
+
+    .system-metrics .metric span {
+      font-size: 1.2rem;
+      color: #FF5722;
+    }
+
+    .vital-signs .vital {
+      font-size: 1.5rem;
+      color: #4CAF50;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .top-section {
+        flex-direction: column;
+      }
+
+      .stream-section, .ecg-section {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      .bottom-section {
+        flex-direction: column;
+      }
+
+      .vital-signs, .system-metrics {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+    }
   </style>
 </head>
 
@@ -225,51 +308,27 @@
             delayedPattern.push(canvasHeight / 2);
         }
 
-        let newPoint = delayedPattern[(xOffset++) % delayedPattern.length] + (Math.random() - 0.5) * 2;
+        let newPoint = delayedPattern[(xOffset++) % delayedPattern.length];
         ecgData.push(newPoint);
 
-        // Clear the canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw the ECG line
+        // Clear the canvas and redraw the ECG waveform
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         ctx.beginPath();
         ctx.moveTo(0, ecgData[0]);
+
         for (let i = 1; i < ecgData.length; i++) {
             ctx.lineTo(i, ecgData[i]);
         }
-        ctx.strokeStyle = '#00ff00';
+
+        ctx.strokeStyle = '#4CAF50';
         ctx.lineWidth = 2;
         ctx.stroke();
     }
 
-    // Initialize ECG data and start updating
+    // ECG animation loop
     let xOffset = 0;
+    setInterval(updateECG, 50);
     initializeECGData();
-    setInterval(updateECG, 60); // Slowed down the update interval for a noticeable delay
-
-    // Periodically reinitialize ECG data to avoid drift
-    setInterval(initializeECGData, 30000); // Reinitialize every 30 seconds
-
-    // Function to fetch and display system metrics
-    async function fetchMetrics() {
-        try {
-            const response = await fetch('/metrics');
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            document.getElementById('cpu-usage').textContent = `${data.cpu_usage}%`;
-            document.getElementById('memory-usage').textContent = `${data.memory_usage}%`;
-            document.getElementById('disk-usage').textContent = `${data.disk_usage}%`;
-        } catch (error) {
-            console.error('Error fetching metrics:', error);
-        }
-    }
-
-    // Fetch metrics every 2 seconds
-    setInterval(fetchMetrics, 2000);
-    fetchMetrics(); // Initial call to load data immediately
   </script>
 </body>
 
